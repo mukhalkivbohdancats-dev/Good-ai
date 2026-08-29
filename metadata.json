@@ -1,0 +1,6 @@
+{
+  "name": "Smart AI Search",
+  "description": "Intelligent multi-source AI research assistant with Wikipedia integration, Google search grounding, AI overview synthesis, and custom website filtering.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
