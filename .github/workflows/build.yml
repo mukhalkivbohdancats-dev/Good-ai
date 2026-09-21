@@ -15,31 +15,37 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      with:
-        ref: main
-
-    - name: Unzip uploaded archive if present
-      run: |
-        if [ -f "smart-ai-search.zip" ]; then
-          echo "Unzipping smart-ai-search.zip..."
-          unzip -o smart-ai-search.zip -d .
-        fi
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
         java-version: '17'
         distribution: 'temurin'
 
+    - name: Unzip archive and fix project structure
+      run: |
+        if [ -f "smart-ai-search.zip" ]; then
+          echo "Unzipping smart-ai-search.zip..."
+          unzip -o smart-ai-search.zip -d temp_unzip
+          # Якщо файли загорнуті у внутрішню папку, витягуємо їх у корінь
+          if [ $(ls -1 temp_unzip | wc -l) -eq 1 ] && [ -d temp_unzip/* ]; then
+            cp -r temp_unzip/*/* . 2>/dev/null || true
+            cp -r temp_unzip/*/. . 2>/dev/null || true
+          else
+            cp -r temp_unzip/* . 2>/dev/null || true
+          fi
+          rm -rf temp_unzip
+        fi
+
     - name: Setup Compatible Gradle Wrapper
       run: |
-        gradle wrapper --gradle-version 8.4 || true
+        gradle wrapper --gradle-version 8.4 --distribution-type bin
 
     - name: Make gradlew executable
-      run: chmod +x gradlew || true
+      run: chmod +x gradlew
 
     - name: Build Debug APK
-      run: ./gradlew assembleDebug --no-daemon
+      run: ./gradlew assembleDebug --no-daemon --stacktrace
 
     - name: Copy APK to apk folder
       run: |
