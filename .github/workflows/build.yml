@@ -27,7 +27,6 @@ jobs:
         if [ -f "smart-ai-search.zip" ]; then
           echo "Unzipping smart-ai-search.zip..."
           unzip -o smart-ai-search.zip -d temp_unzip
-          # Якщо файли загорнуті у внутрішню папку, витягуємо їх у корінь
           if [ $(ls -1 temp_unzip | wc -l) -eq 1 ] && [ -d temp_unzip/* ]; then
             cp -r temp_unzip/*/* . 2>/dev/null || true
             cp -r temp_unzip/*/. . 2>/dev/null || true
@@ -37,9 +36,9 @@ jobs:
           rm -rf temp_unzip
         fi
 
-    - name: Setup Compatible Gradle Wrapper
+    - name: Setup Gradle 9.3.1 Wrapper
       run: |
-        gradle wrapper --gradle-version 8.4 --distribution-type bin
+        gradle wrapper --gradle-version 9.3.1 --distribution-type bin
 
     - name: Make gradlew executable
       run: chmod +x gradlew
