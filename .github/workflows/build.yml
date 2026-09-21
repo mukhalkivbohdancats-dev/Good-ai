@@ -15,10 +15,13 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        ref: main
 
-    - name: Unzip uploaded archive
+    - name: Unzip uploaded archive if present
       run: |
         if [ -f "smart-ai-search.zip" ]; then
+          echo "Unzipping smart-ai-search.zip..."
           unzip -o smart-ai-search.zip -d .
         fi
 
@@ -29,23 +32,24 @@ jobs:
         distribution: 'temurin'
 
     - name: Setup Compatible Gradle Wrapper
-      run: gradle wrapper --gradle-version 8.4
+      run: |
+        gradle wrapper --gradle-version 8.4 || true
 
     - name: Make gradlew executable
-      run: chmod +x gradlew
+      run: chmod +x gradlew || true
 
     - name: Build Debug APK
       run: ./gradlew assembleDebug --no-daemon
 
     - name: Copy APK to apk folder
       run: |
-        mkdir -p "apk"
-        cp app/build/outputs/apk/debug/*.apk "apk/app-debug.apk"
+        mkdir -p apk
+        find app/build/outputs/apk/ -name "*.apk" -exec cp {} apk/app-debug.apk \;
 
     - name: Commit and Push APK
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add "apk/"
-        git commit -m "auto: update built APK in apk folder" || exit 0
-        git push
+        git add apk/
+        git diff-index --quiet HEAD || git commit -m "auto: update built APK in apk folder"
+        git push origin main
